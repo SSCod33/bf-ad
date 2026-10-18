@@ -1,3 +1,4 @@
+
 (function () {
     if (!window.__bfAuthorOk) return;
     var adFillState = { impressions: 0, fills: 0, empties: 0, lastKind: "" };
