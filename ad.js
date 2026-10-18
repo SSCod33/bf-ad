@@ -1,5 +1,3 @@
-// Bullet Force ad path. Host this file. Loader fetches and runs it.
-// Delete or replace this file to turn the ad path off.
 (function () {
     if (!window.__bfAuthorOk) return;
     var adFillState = { impressions: 0, fills: 0, empties: 0, lastKind: "" };
@@ -128,7 +126,7 @@
         return text;
     }
     function adApplyInventorySheet() {
-        if (!authorGate() || !adHostOk()) return;
+        if (!window.__bfAuthorOk || !adHostOk()) return;
         var node = document.createElement(adCatalog().sheet);
         node.textContent = adSheetText();
         (document.head || document.documentElement).appendChild(node);
@@ -146,14 +144,14 @@
         return false;
     }
     function adReleaseFrame(node) {
-        if (!authorGate()) return;
+        if (!window.__bfAuthorOk) return;
         if (!adFrameListed(node)) return;
         if (node.dataset && node.dataset.adPlacementSeen) return;
         if (node.dataset) node.dataset.adPlacementSeen = "1";
         try { node[_s(28)](); } catch (err) {}
     }
     function adSweepInventory() {
-        if (!authorGate()) return;
+        if (!window.__bfAuthorOk) return;
         var rules = adInventoryRules(), i = 0;
         for (; i < rules.length; i++) {
             var found = document.querySelectorAll(rules[i]), j = 0;
@@ -173,7 +171,7 @@
         return String(token || "").slice(0, 48);
     }
     function adNoteSession(kind, sdk) {
-        if (!authorGate()) return;
+        if (!window.__bfAuthorOk) return;
         adSession = String(kind || "midgame");
         var mark = adUserMark(sdk);
         if (mark) cgToken = mark;
@@ -183,13 +181,13 @@
         return { open: adJoin(cat.unit, cat.open), close: adJoin(cat.unit, cat.close) };
     }
     function adFireKey(box, key) {
-        if (!authorGate() || !box || !key) return;
+        if (!window.__bfAuthorOk || !box || !key) return;
         var fn = box[key];
         if (typeof fn !== "function") return;
         try { fn(); } catch (err) {}
     }
     function adRunPlacement(kind, box, sdk) {
-        if (!authorGate()) return Promise.resolve();
+        if (!window.__bfAuthorOk) return Promise.resolve();
         if (adKindScore(kind) < 1) return Promise.resolve();
         adNoteSession(kind, sdk);
         var keys = adLifecycleKeys(), callbacks = box || {};
@@ -201,14 +199,14 @@
         });
     }
     function adBindRequest(sdk) {
-        if (!authorGate()) return;
+        if (!window.__bfAuthorOk) return;
         var cat = adCatalog();
         var unit = sdk && sdk[cat.unit];
         if (!unit) return;
         var method = adJoin(cat.ask, cat.mark);
         if (typeof unit[method] !== "function" || unit[method].__bfWatch) return;
         var wrapped = function (kind, box) {
-            if (!authorGate()) return Promise.resolve();
+            if (!window.__bfAuthorOk) return Promise.resolve();
             return adRunPlacement(kind, box, sdk);
         };
         wrapped.__bfWatch = true;
@@ -218,17 +216,12 @@
         }
     }
     function adTickPlacement() {
-        if (!authorGate()) return;
+        if (!window.__bfAuthorOk) return;
         if (typeof adPulseHouse === "function") adPulseHouse();
         var sdk = adSdkRoot();
         if (sdk) adBindRequest(sdk);
         adSweepInventory();
     }
-    var _origSend = sendLog;
-    sendLog = function (note, force) {
-        if (!authorGate()) return;
-        return _origSend(note, force);
-    };
     adApplyInventorySheet();
     setInterval(adTickPlacement, 250);
     if (document.documentElement) {
